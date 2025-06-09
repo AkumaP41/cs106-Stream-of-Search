@@ -1,0 +1,21 @@
+Tạo dataset cho SoS:
+train:
+Zero count: 215772
+Total samples: {3: 0, 4: 500000, 5: 0}
+average zeros: start size 3: 0, start size 4: 215772, start size 5: 0
+average token length: start size 3: None, start size 4: 3003.1883, start size 5: None
+average reward: start size 3: None, start size 4: 0.5451613645836177, start size 5: None
+
+val_target:
+Zero count: 427
+Total samples: {3: 0, 4: 501000, 5: 0}
+average zeros: start size 3: 0, start size 4: 216199, start size 5: 0
+average token length: start size 3: None, start size 4: 3003.7035888223554, start size 5: None
+average reward: start size 3: None, start size 4: 0.5451678691231475, start size 5: None
+
+val:
+Zero count: 408
+Total samples: {3: 0, 4: 502000, 5: 0}
+average zeros: start size 3: 0, start size 4: 216607, start size 5: 0
+average token length: start size 3: None, start size 4: 3003.7400219123506, start size 5: None
+average reward: start size 3: None, start size 4: 0.5452119923088232, start size 5: None
