@@ -96,11 +96,11 @@ sympy==1.12
 tabulate==0.9.0
 tiktoken==0.6.0
 tokenizers==0.15.2
-torch==2.0.1+cu117
+torch==2.2.2
 torchtyping==0.1.4
 tqdm==4.66.1
 transformers==4.38.2
-triton==2.0.0
+triton==2.2.0
 tritonclient==2.39.0
 typeguard==4.1.5
 typing_extensions==4.8.0

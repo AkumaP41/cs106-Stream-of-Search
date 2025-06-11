@@ -47,7 +47,7 @@ def main(args):
 
     with open(config["model_config"], "r") as f:
         model_config = json.load(f)
-
+ 
     # only GPTNeo model for now
     if not args.reset:
         model_config = GPTNeoConfig(**model_config)
@@ -57,7 +57,7 @@ def main(args):
         model = GPTNeoForCausalLM.from_pretrained(
             args.ckpt,
             torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2",
+            attn_implementation="eager", #"flash_attention_2",
         )
 
         tokenizer = AutoTokenizer.from_pretrained(args.ckpt)
@@ -134,7 +134,7 @@ def main(args):
         eval_steps=config["eval_steps"],
         logging_steps=config["log_steps"],
         gradient_accumulation_steps=config["gradient_accumulation_steps"],
-        gradient_checkpointing=True,
+        gradient_checkpointing=False, # True,
         num_train_epochs=config["num_train_epochs"],
         weight_decay=config["weight_decay"],
         warmup_steps=config["warmup_steps"],
@@ -144,13 +144,15 @@ def main(args):
         save_total_limit=config["save_total_limit"],
         save_steps=config["save_steps"],
         seed=config["seed"],
-        bf16=True,
+        bf16=False, # True,
+        fp16=True,
+        optim="adamw_torch", # tránh dùng optimizer DeepSpeed
         push_to_hub=False,
         report_to="wandb",
         run_name=config["name"],
         ddp_find_unused_parameters=False,
         load_best_model_at_end=True,
-        torch_compile=True,
+        torch_compile= False, # True,
         metric_for_best_model="valid_loss",
         greater_is_better=False,
     )
@@ -168,6 +170,7 @@ def main(args):
     )
 
     # train
+    print("Training started ...")
     if args.resume:
         trainer.train(resume_from_checkpoint=args.ckpt)
     else:
