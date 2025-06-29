@@ -7,12 +7,9 @@ import tqdm
 
 import numpy as np
 import torch
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, GPTNeoForCausalLM
-from datasets import load_dataset, DatasetDict, Dataset
+from transformers import AutoTokenizer, GPTNeoForCausalLM
 
 from countdown_utils import *
-from countdown_bfs import bfs
-from countdown_dfs import dfs
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, default=4)
@@ -24,6 +21,7 @@ parser.add_argument("-d", "--data",type=str, default="val_b3_t100_n100000_random
 parser.add_argument("--temperature", type=float, default=0.0)
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--ctx", type=int, default=4096)
+parser.add_argument("--result", type=str, default="outputs/results")
 parser.add_argument("--gens", type=int, default=1)
 
 
@@ -82,7 +80,7 @@ def eval_ll(model, tokenizer, data, batch_size=128, context_len=4096, temperatur
 
 args = parser.parse_args()
 torch.manual_seed(args.seed)
-model = GPTNeoForCausalLM.from_pretrained(args.ckpt, torch_dtype=torch.bfloat16, attn_implementation='flash_attention_2')
+model = GPTNeoForCausalLM.from_pretrained(args.ckpt, torch_dtype=torch.float16, attn_implementation='eager')
 
 model.eval()
 model.cuda()
@@ -101,10 +99,10 @@ pred_reasons = []
 tokenizer.padding_side = "left"
 test_prompts = [tokenizer.bos_token + f"Current State: {sample['target']}:{sample['nums']}, Operations: []"  for sample in data[args.offset:args.num]]
 len_nums = [len(sample['nums']) for sample in data[args.offset:args.num]]
-data_4 = [d for d, l in zip(test_prompts, len_nums) if l == 4]
-predictions = eval_ll(model, tokenizer, data_4, batch_size=args.batch_size, context_len=args.ctx, temperature=args.temperature, n=args.gens)
+data_3 = [d for d, l in zip(test_prompts, len_nums) if l == 3]
+predictions = eval_ll(model, tokenizer, data_3, batch_size=args.batch_size, context_len=args.ctx, temperature=args.temperature, n=args.gens)
 
-len_pred_nums = [4 for _ in predictions]
+len_pred_nums = [3 for _ in predictions]
 
 # rate outputs
 true_rating = []
@@ -125,8 +123,12 @@ print(f"Average true rating: {np.mean(true_rating)}")
 print(f"Accuracy: {np.mean([r > 0 for r in pred_ratings])}")
 print(f"True Accuracy: {np.mean([r > 0 for r in true_rating])}")
 
-ckpt_dir = os.path.dirname(args.ckpt)
 # save results
-results_file = os.path.join(ckpt_dir, f"results_{args.data.replace('/','_')}_{args.num}_{args.offset}")
+ckpt_name = os.path.basename(args.ckpt)
+data_name = os.path.splitext(args.data)[0]
+
+results_file = os.path.join(
+    args.result, 
+    f"results_{data_name.replace('/','_')}_{args.num}_{args.offset}_{ckpt_name}.json")
 with open(results_file, "w") as f:
-    json.dump({"trajectories": predictions, "ratings": pred_ratings.tolist(), "reasons": pred_reasons}, f, indent=4)
+    json.dump({"trajectories": predictions, "ratings": pred_ratings.tolist(), "reasons": pred_reasons}, f, indent=3)

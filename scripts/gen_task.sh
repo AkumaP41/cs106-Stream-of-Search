@@ -1,5 +1,15 @@
 #!/bin/bash
 
+SEED=4
+DATA_DIR="data/b3_3_random_5e3/"
+RANGE=3
+NUM_SAMPLES=5000
+
 cd src
 
-python countdown_generate.py --seed 4 --data_dir data/b4_3_random/ --min_range 4 --start_range 4 --num_samples 50000
+python countdown_generate.py \
+    --seed "$SEED" \
+    --data_dir "$DATA_DIR" \
+    --min_range "$RANGE" \
+    --start_range "$RANGE" \
+    --num_samples "$NUM_SAMPLES"

@@ -2,6 +2,12 @@ import argparse
 import json
 import os
 import random
+import warnings
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+warnings.filterwarnings("ignore", message=".*an autograd kernel was not registered.*")
+warnings.filterwarnings("ignore", message=".*torch.cuda.*DtypeTensor constructors are no longer recommended.*")
+warnings.filterwarnings("ignore", category=UserWarning)
 
 import torch
 from accelerate import Accelerator
@@ -56,7 +62,7 @@ def main(args):
     else:
         model = GPTNeoForCausalLM.from_pretrained(
             args.ckpt,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=torch.float16,
             attn_implementation="eager", #"flash_attention_2",
         )
 
@@ -144,7 +150,6 @@ def main(args):
         save_total_limit=config["save_total_limit"],
         save_steps=config["save_steps"],
         seed=config["seed"],
-        bf16=False, # True,
         fp16=True,
         optim="adamw_torch", # tránh dùng optimizer DeepSpeed
         push_to_hub=False,

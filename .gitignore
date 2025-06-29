@@ -171,4 +171,5 @@ cython_debug/
 src/data
 src/data1
 src/outputs
+src/outputs_v1
 results
